@@ -60,18 +60,18 @@ export function CarDamageGuideExamples() {
   return (
     <>
       <GuideExampleSection
-        title="「なし」でOKな例"
-        items={[
-          "年式相応の薄い擦れキズ程度",
-          "使用感として自然な軽微な状態",
-        ]}
-      />
-      <GuideExampleSection
         title="「あり」を選んで写真をお願いする例"
         items={[
           "飛び石キズ、目立つサビ・凹み",
           "内装の破れ、目立つ汚れ・シミ",
           "修復歴のある箇所、気になる箇所が複数ある場合",
+        ]}
+      />
+      <GuideExampleSection
+        title="「なし」でOKな例"
+        items={[
+          "年式相応の薄い擦れキズ程度",
+          "使用感として自然な軽微な状態",
         ]}
       />
     </>
