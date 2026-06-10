@@ -4,11 +4,8 @@ import { useState } from "react";
 import { assets } from "@/lib/figma-assets";
 import type { KatixFormErrors } from "@/components/bike-design/validate-katix-form";
 import { RadioOption } from "@/components/shared/form-controls";
-import {
-  CarDamageDeclarationNote,
-  CarDamagePhotoHint,
-} from "@/components/car-design/car-damage-guide-content";
 import { CarDamageGuideModal } from "@/components/car-design/car-damage-guide-modal";
+import { CarDamagePhotoHint } from "@/components/car-design/car-damage-guide-content";
 import {
   CAR_DAMAGE_SLOT_ID,
   type CarDamagePresence,
@@ -18,7 +15,7 @@ import {
   CAR_ILLUSTRATION_PREVIEW_BOX,
   PhotoUploadCard,
 } from "@/components/shared/photo-upload-card";
-import { IconPlus, IconQuestion } from "@/components/shared/icons";
+import { IconPlus } from "@/components/shared/icons";
 
 const CAR_DAMAGE_SCRATCH_PLACEHOLDER = (
   <img
@@ -35,7 +32,7 @@ const CAR_FREE_PLUS_PLACEHOLDER = (
 );
 
 type CarDamagePhotosSectionProps = {
-  damagePresence: CarDamagePresence;
+  damagePresence: CarDamagePresence | null;
   onDamagePresenceChange: (value: CarDamagePresence) => void;
   damageExtraSlotIds: string[];
   photoPreviews: Record<string, string>;
@@ -54,8 +51,28 @@ export function CarDamagePhotosSection({
   errors,
 }: CarDamagePhotosSectionProps) {
   const [guideOpen, setGuideOpen] = useState(false);
+  const [pendingPresence, setPendingPresence] = useState<CarDamagePresence | null>(null);
   const fieldError = (key: string) => (showErrors ? errors[key] : undefined);
   const showUploadCards = damagePresence === "yes";
+
+  const handlePresenceSelect = (value: CarDamagePresence) => {
+    if (value === damagePresence) return;
+    setPendingPresence(value);
+    setGuideOpen(true);
+  };
+
+  const handleGuideClose = () => {
+    setGuideOpen(false);
+    setPendingPresence(null);
+  };
+
+  const handleGuideConfirm = () => {
+    if (pendingPresence) {
+      onDamagePresenceChange(pendingPresence);
+    }
+    setGuideOpen(false);
+    setPendingPresence(null);
+  };
 
   return (
     <>
@@ -64,25 +81,12 @@ export function CarDamagePhotosSection({
         data-node-id="4974:3044"
         data-name="stack"
       >
-        <div className="flex flex-wrap w-full items-center justify-between gap-2">
-          <p
-            className="font-bold leading-[28px] text-[20px] text-[#3d3d3d]"
-            data-node-id="4974:3045"
-          >
-            傷サビ凹み
-          </p>
-          <button
-            type="button"
-            onClick={() => setGuideOpen(true)}
-            className="flex flex-wrap gap-1 items-center shrink-0"
-            aria-haspopup="dialog"
-          >
-            <IconQuestion className="size-5 shrink-0 text-[#2a7fff]" />
-            <span className="font-medium leading-[20px] text-[14px] text-[#2a7fff] underline">
-              申告の目安
-            </span>
-          </button>
-        </div>
+        <p
+          className="font-bold leading-[28px] text-[20px] text-[#3d3d3d]"
+          data-node-id="4974:3045"
+        >
+          傷サビ凹み
+        </p>
 
         <p
           className="leading-[20px] text-[14px] font-medium text-[#656767] w-full"
@@ -93,8 +97,6 @@ export function CarDamagePhotosSection({
           を選択してください。
         </p>
 
-        <CarDamageDeclarationNote />
-
         <div
           className="flex flex-col gap-2 items-stretch w-full"
           data-node-id="5059:616"
@@ -102,20 +104,24 @@ export function CarDamagePhotosSection({
         >
           <RadioOption
             selected={damagePresence === "yes"}
-            onSelect={() => onDamagePresenceChange("yes")}
+            onSelect={() => handlePresenceSelect("yes")}
             label="あり"
           />
           <RadioOption
             selected={damagePresence === "no"}
-            onSelect={() => onDamagePresenceChange("no")}
+            onSelect={() => handlePresenceSelect("no")}
             label="なし"
           />
+          {fieldError("damagePresence") && (
+            <p className="text-[13px] font-medium leading-5 text-[#d01010]">
+              {fieldError("damagePresence")}
+            </p>
+          )}
         </div>
 
         {showUploadCards && (
           <>
             <CarDamagePhotoHint />
-
             <div className={KATIX_PHOTO_GRID} data-node-id="5059:591" data-name="Container">
               <PhotoUploadCard
                 slotId={CAR_DAMAGE_SLOT_ID}
@@ -148,7 +154,13 @@ export function CarDamagePhotosSection({
         )}
       </div>
 
-      <CarDamageGuideModal open={guideOpen} onClose={() => setGuideOpen(false)} />
+      {pendingPresence && (
+        <CarDamageGuideModal
+          open={guideOpen}
+          onClose={handleGuideClose}
+          onConfirm={handleGuideConfirm}
+        />
+      )}
     </>
   );
 }
