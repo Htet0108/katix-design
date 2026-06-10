@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f3f4f6;
+  --foreground: #3d3d3d;
+  --contents-brand: #389656;
+  --contents-primary: #3d3d3d;
+  --contents-secondary: #505353;
+  --contents-tertiary: #656767;
+  --contents-border: #e2e4e9;
+  --contents-error: #d01010;
+  --background-error: #fae7e7;
+  --neutral-600: #414758;
+  --brand-50: #edf6ee;
+  --basic-white: #ffffff;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-noto-sans-jp), var(--font-inter), "Inter",
+    "Noto Sans JP", "Hiragino Sans", sans-serif;
+}
+
+.katix-prototype-root {
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.katix-prototype-root button:focus-visible,
+.katix-prototype-root textarea:focus-visible {
+  outline: 2px solid var(--contents-brand);
+  outline-offset: 2px;
+}
+
+.katix-prototype-root button {
+  touch-action: manipulation;
+}
