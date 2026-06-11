@@ -18,6 +18,14 @@ const STATUS_TEXT_CLASS = "min-w-0 text-[14px] font-medium leading-[20px] text-[
 const ACTION_BUTTON_CLASS =
   "pointer-events-none shrink-0 rounded border border-solid border-[#389656] bg-white px-3 py-1.5 text-[13px] font-medium leading-5 text-[#389656]";
 
+function RequiredBadge() {
+  return (
+    <div className="bg-[#fae7e7] flex items-center justify-center overflow-clip px-2 py-0.5 relative rounded shrink-0 pointer-events-none">
+      <span className="leading-[16px] text-[12px] font-bold text-[#d01010]">必須</span>
+    </div>
+  );
+}
+
 export function CarDamagePresenceStep({
   presence,
   onOpen,
@@ -36,7 +44,8 @@ export function CarDamagePresenceStep({
         aria-haspopup="dialog"
         aria-label={answered ? `${statusText}の回答を変更` : "傷サビ凹み・汚れ破れについて回答"}
       >
-        <span className={`${STATUS_TEXT_CLASS} pointer-events-none`}>{statusText}</span>
+        <span className={`${STATUS_TEXT_CLASS} flex-1 pointer-events-none`}>{statusText}</span>
+        <RequiredBadge />
         <span className={ACTION_BUTTON_CLASS} aria-hidden>
           {answered ? "変更する" : "回答する"}
         </span>

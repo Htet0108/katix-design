@@ -9,7 +9,7 @@ module.exports = {
   theme: {
     extend: {
       maxWidth: {
-        "katix-mobile": "390px",
+        "katix-mobile": "430px",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "Hiragino Sans", "Noto Sans JP", "sans-serif"],

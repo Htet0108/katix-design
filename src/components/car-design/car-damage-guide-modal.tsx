@@ -69,7 +69,7 @@ export function CarDamageGuideModal({
           id="car-damage-guide-title"
           className="font-bold text-[20px] leading-[28px] text-[#3d3d3d] w-full text-center"
         >
-          傷サビ凹みの申告について
+          傷サビ凹みなどの申告について
         </h2>
 
         <CarDamageDeclarationNote />

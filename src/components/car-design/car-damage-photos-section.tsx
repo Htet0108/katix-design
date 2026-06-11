@@ -31,6 +31,9 @@ const CAR_FREE_PLUS_PLACEHOLDER = (
   </div>
 );
 
+const CAR_DAMAGE_FIELD_TITLE = "傷サビ凹み・汚れ破れ";
+const CAR_DAMAGE_UPLOAD_TITLE = "傷・汚れなど";
+
 type CarDamagePhotosSectionProps = {
   damagePresence: CarDamagePresence | null;
   onDamagePresenceChange: (value: CarDamagePresence) => void;
@@ -66,11 +69,8 @@ export function CarDamagePhotosSection({
         data-node-id="4974:3044"
         data-name="stack"
       >
-        <p
-          className="font-bold leading-[28px] text-[20px] text-[#3d3d3d]"
-          data-node-id="4974:3045"
-        >
-          傷サビ凹み・汚れ破れ
+        <p className="font-bold text-[20px] leading-[28px] text-[#3d3d3d] w-full">
+          {CAR_DAMAGE_FIELD_TITLE}
         </p>
 
         <p
@@ -100,7 +100,7 @@ export function CarDamagePhotosSection({
               <PhotoUploadCard
                 slotId={CAR_DAMAGE_SLOT_ID}
                 dataNodeId="5059:592"
-                title="傷サビ凹み・汚れ破れ"
+                title={CAR_DAMAGE_UPLOAD_TITLE}
                 badge="required"
                 uploadTrigger="corner"
                 previewUrl={photoPreviews[CAR_DAMAGE_SLOT_ID]}

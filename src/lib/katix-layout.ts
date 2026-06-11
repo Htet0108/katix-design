@@ -1,9 +1,9 @@
 /**
- * Mobile-first layout tokens (base design: 390px viewport, 16px gutters).
- * Container grows naturally on tablet/desktop while preserving visual hierarchy.
+ * Mobile-first layout tokens (base design: 430px viewport, 16px gutters).
+ * Used by home menu, bike-design, and car-design — not design-system pages.
  */
 
-/** 390px cap at all breakpoints (mobile, tablet, desktop). */
+/** 430px cap at all breakpoints (mobile, tablet, desktop). */
 export const KATIX_CONTAINER =
   "mx-auto w-full max-w-katix-mobile min-w-0";
 
@@ -38,7 +38,7 @@ export const KATIX_CONTENT_WIDTH = "w-full min-w-0";
 export const KATIX_STACK =
   "flex flex-col gap-3 items-stretch w-full min-w-0";
 
-/** Photo upload grids — 2 columns at all breakpoints (390px mobile design). */
+/** Photo upload grids — 2 columns at all breakpoints (430px mobile design). */
 export const KATIX_PHOTO_GRID =
   "grid grid-cols-2 gap-3 w-full min-w-0";
 

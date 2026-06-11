@@ -2,11 +2,12 @@
 
 import { useCallback, useRef, useState } from "react";
 import { CarDamagePhotosSection } from "@/components/car-design/car-damage-photos-section";
+import { CarOptionAppealSection } from "@/components/car-design/car-option-appeal-section";
 import type { CarDamagePresence } from "@/components/car-design/car-damage-spot-types";
 import { CAR_DAMAGE_SLOT_ID } from "@/components/car-design/car-damage-spot-types";
 import { KatixFooter, KatixHeader, KatixPageBody, KatixPageShell } from "@/components/shared/katix-page-shell";
 import { KatixSectionBanner } from "@/components/shared/katix-section-banner";
-import { KATIX_MAIN, KATIX_MAIN_INNER, KATIX_STACK } from "@/lib/katix-layout";
+import { KATIX_MAIN, KATIX_MAIN_INNER } from "@/lib/katix-layout";
 import type { KatixFormErrors } from "@/components/bike-design/validate-katix-form";
 
 export default function KatixCarRegistrationPage() {
@@ -14,6 +15,7 @@ export default function KatixCarRegistrationPage() {
   const activeSlotRef = useRef<string>("");
   const [photoPreviews, setPhotoPreviews] = useState<Record<string, string>>({});
   const [damageExtraSlotIds, setDamageExtraSlotIds] = useState(["car-damage-extra-0"]);
+  const [optionAppealExtraSlotIds, setOptionAppealExtraSlotIds] = useState(["car-option-appeal-extra-0"]);
   const [damagePresence, setDamagePresence] = useState<CarDamagePresence | null>(null);
   const [showErrors, setShowErrors] = useState(false);
   const [errors, setErrors] = useState<KatixFormErrors>({});
@@ -41,6 +43,13 @@ export default function KatixCarRegistrationPage() {
       setDamageExtraSlotIds((ids) => {
         if (ids[ids.length - 1] !== slotId) return ids;
         return [...ids, `car-damage-extra-${ids.length}`];
+      });
+    }
+
+    if (slotId.startsWith("car-option-appeal-extra-")) {
+      setOptionAppealExtraSlotIds((ids) => {
+        if (ids[ids.length - 1] !== slotId) return ids;
+        return [...ids, `car-option-appeal-extra-${ids.length}`];
       });
     }
 
@@ -77,11 +86,11 @@ export default function KatixCarRegistrationPage() {
           </div>
 
           <KatixSectionBanner id="katix-section-photos">
-            ①　写真を撮影・アップロード
+            ②　車両状態と特徴
           </KatixSectionBanner>
 
           <div className={KATIX_MAIN_INNER}>
-            <div className={`content-stretch ${KATIX_STACK}`}>
+            <div className="flex flex-col gap-6 items-stretch w-full min-w-0">
               <CarDamagePhotosSection
                 damagePresence={damagePresence}
                 onDamagePresenceChange={setDamagePresence}
@@ -90,6 +99,11 @@ export default function KatixCarRegistrationPage() {
                 onPhotoUploadClick={triggerPhotoUpload}
                 showErrors={showErrors}
                 errors={errors}
+              />
+              <CarOptionAppealSection
+                extraSlotIds={optionAppealExtraSlotIds}
+                photoPreviews={photoPreviews}
+                onPhotoUploadClick={triggerPhotoUpload}
               />
             </div>
 
