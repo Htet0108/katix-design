@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { assets } from "@/lib/figma-assets";
 import type { KatixFormErrors } from "@/components/bike-design/validate-katix-form";
-import { RadioOption } from "@/components/shared/form-controls";
 import { CarDamageGuideModal } from "@/components/car-design/car-damage-guide-modal";
 import { CarDamagePhotoHint } from "@/components/car-design/car-damage-guide-content";
+import { CarDamagePresenceStep } from "@/components/car-design/car-damage-presence-step";
 import {
   CAR_DAMAGE_SLOT_ID,
   type CarDamagePresence,
@@ -51,27 +51,12 @@ export function CarDamagePhotosSection({
   errors,
 }: CarDamagePhotosSectionProps) {
   const [guideOpen, setGuideOpen] = useState(false);
-  const [pendingPresence, setPendingPresence] = useState<CarDamagePresence | null>(null);
   const fieldError = (key: string) => (showErrors ? errors[key] : undefined);
   const showUploadCards = damagePresence === "yes";
 
-  const handlePresenceSelect = (value: CarDamagePresence) => {
-    if (value === damagePresence) return;
-    setPendingPresence(value);
-    setGuideOpen(true);
-  };
-
-  const handleGuideClose = () => {
+  const handleGuideConfirm = (value: CarDamagePresence) => {
+    onDamagePresenceChange(value);
     setGuideOpen(false);
-    setPendingPresence(null);
-  };
-
-  const handleGuideConfirm = () => {
-    if (pendingPresence) {
-      onDamagePresenceChange(pendingPresence);
-    }
-    setGuideOpen(false);
-    setPendingPresence(null);
   };
 
   return (
@@ -92,25 +77,14 @@ export function CarDamagePhotosSection({
           className="leading-[20px] text-[14px] font-medium text-[#656767] w-full"
           data-node-id="4974:3377"
         >
-          外装の傷・サビ・凹みに加え、内装の破れや汚れも対象です。該当する場合は
-          <span className="font-bold text-[#3d3d3d]">「あり」</span>
-          を選択してください。
+          外装の傷・サビ・凹みに加え、内装の破れや汚れがあるかを教えてください。
         </p>
 
-        <div
-          className="flex flex-col gap-2 items-stretch w-full"
-          data-node-id="5059:616"
-          data-name="Container"
-        >
-          <RadioOption
-            selected={damagePresence === "yes"}
-            onSelect={() => handlePresenceSelect("yes")}
-            label="あり"
-          />
-          <RadioOption
-            selected={damagePresence === "no"}
-            onSelect={() => handlePresenceSelect("no")}
-            label="なし"
+        <div className="flex flex-col gap-2 items-stretch w-full">
+          <CarDamagePresenceStep
+            presence={damagePresence}
+            onOpen={() => setGuideOpen(true)}
+            hasError={Boolean(fieldError("damagePresence"))}
           />
           {fieldError("damagePresence") && (
             <p className="text-[13px] font-medium leading-5 text-[#d01010]">
@@ -154,13 +128,12 @@ export function CarDamagePhotosSection({
         )}
       </div>
 
-      {pendingPresence && (
-        <CarDamageGuideModal
-          open={guideOpen}
-          onClose={handleGuideClose}
-          onConfirm={handleGuideConfirm}
-        />
-      )}
+      <CarDamageGuideModal
+        open={guideOpen}
+        initialPresence={damagePresence}
+        onClose={() => setGuideOpen(false)}
+        onConfirm={handleGuideConfirm}
+      />
     </>
   );
 }

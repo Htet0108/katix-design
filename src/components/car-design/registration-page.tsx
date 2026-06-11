@@ -7,10 +7,7 @@ import { CAR_DAMAGE_SLOT_ID } from "@/components/car-design/car-damage-spot-type
 import { KatixFooter, KatixHeader, KatixPageBody, KatixPageShell } from "@/components/shared/katix-page-shell";
 import { KatixSectionBanner } from "@/components/shared/katix-section-banner";
 import { KATIX_MAIN, KATIX_MAIN_INNER, KATIX_STACK } from "@/lib/katix-layout";
-import {
-  ERROR_SELECT,
-  type KatixFormErrors,
-} from "@/components/bike-design/validate-katix-form";
+import type { KatixFormErrors } from "@/components/bike-design/validate-katix-form";
 
 export default function KatixCarRegistrationPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -53,7 +50,7 @@ export default function KatixCarRegistrationPage() {
   const handleSubmit = useCallback(() => {
     const nextErrors: KatixFormErrors = {};
     if (!damagePresence) {
-      nextErrors.damagePresence = ERROR_SELECT;
+      nextErrors.damagePresence = "回答してください";
     } else if (damagePresence === "yes" && !photoPreviews[CAR_DAMAGE_SLOT_ID]) {
       nextErrors[CAR_DAMAGE_SLOT_ID] = "写真をアップロードしてください";
     }

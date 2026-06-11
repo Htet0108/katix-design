@@ -26,7 +26,7 @@ export function CarDamagePhotoHint() {
       className="leading-[20px] text-[14px] font-medium text-[#656767] w-full"
       data-node-id="5059:635"
     >
-      各箇所の
+      ありの場合は、各箇所の
       <span className="font-bold text-[#3d3d3d]">全体写真</span>
       と
       <span className="font-bold text-[#3d3d3d]">拡大写真</span>
@@ -60,7 +60,7 @@ export function CarDamageGuideExamples() {
   return (
     <>
       <GuideExampleSection
-        title="「あり」を選んで写真をお願いする例"
+        title="「あり」に該当する例"
         items={[
           "飛び石キズ、目立つサビ・凹み",
           "内装の破れ、目立つ汚れ・シミ",
@@ -68,7 +68,7 @@ export function CarDamageGuideExamples() {
         ]}
       />
       <GuideExampleSection
-        title="「なし」でOKな例"
+        title="「なし」で問題ない例"
         items={[
           "年式相応の薄い擦れキズ程度",
           "使用感として自然な軽微な状態",
