@@ -50,7 +50,7 @@ export default function KatixCarRegistrationPage() {
   const handleSubmit = useCallback(() => {
     const nextErrors: KatixFormErrors = {};
     if (!damagePresence) {
-      nextErrors.damagePresence = "回答してください";
+      nextErrors.damagePresence = "未回答です。回答してください。";
     } else if (damagePresence === "yes" && !photoPreviews[CAR_DAMAGE_SLOT_ID]) {
       nextErrors[CAR_DAMAGE_SLOT_ID] = "写真をアップロードしてください";
     }

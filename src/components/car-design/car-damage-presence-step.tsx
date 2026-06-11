@@ -8,26 +8,15 @@ type CarDamagePresenceStepProps = {
   hasError?: boolean;
 };
 
-const ANSWER_MICROCOPY: Record<
-  CarDamagePresence | "unanswered",
-  { label: string; description: string }
-> = {
-  unanswered: {
-    label: "未回答",
-    description: "傷サビ凹みの有無",
-  },
-  yes: {
-    label: "あり",
-    description: "該当あり",
-  },
-  no: {
-    label: "なし",
-    description: "該当なし",
-  },
+const ANSWER_LABEL: Record<CarDamagePresence, string> = {
+  yes: "（傷サビ凹み・汚れ破れ）あり",
+  no: "（傷サビ凹み・汚れ破れ）なし",
 };
 
+const STATUS_TEXT_CLASS = "min-w-0 text-[14px] font-medium leading-[20px] text-[#3d3d3d]";
+
 const ACTION_BUTTON_CLASS =
-  "shrink-0 rounded border border-solid border-[#389656] bg-white px-3 py-1.5 text-[13px] font-medium leading-5 text-[#389656] hover:bg-[#edf6ee] transition-colors";
+  "pointer-events-none shrink-0 rounded border border-solid border-[#389656] bg-white px-3 py-1.5 text-[13px] font-medium leading-5 text-[#389656]";
 
 export function CarDamagePresenceStep({
   presence,
@@ -36,36 +25,22 @@ export function CarDamagePresenceStep({
 }: CarDamagePresenceStepProps) {
   const answered = presence !== null;
   const borderClass = hasError && !answered ? "border-[#d01010]" : "border-transparent";
-  const copy = answered ? ANSWER_MICROCOPY[presence] : ANSWER_MICROCOPY.unanswered;
+  const statusText = answered && presence ? ANSWER_LABEL[presence] : "（傷サビ凹み・汚れ破れ）未回答";
 
   return (
     <div className="flex flex-col gap-1 w-full min-w-0">
-      <div
-        className={`bg-white flex flex-col items-stretch overflow-hidden relative rounded border border-solid shadow-[0px_1px_2px_0px_rgba(61,61,61,0.08)] w-full ${borderClass}`}
+      <button
+        type="button"
+        onClick={onOpen}
+        className={`bg-white flex items-center justify-between gap-3 overflow-hidden relative rounded border border-solid shadow-[0px_1px_2px_0px_rgba(61,61,61,0.08)] w-full cursor-pointer px-3 py-3 text-left hover:opacity-70 transition-opacity touch-manipulation ${borderClass}`}
+        aria-haspopup="dialog"
+        aria-label={answered ? `${statusText}の回答を変更` : "傷サビ凹み・汚れ破れについて回答"}
       >
-        <div className="flex items-center justify-between gap-3 px-3 py-3 w-full">
-          <div className="flex min-w-0 flex-1 items-center gap-1">
-            {answered ? (
-              <p className="min-w-0 text-[14px] font-medium leading-[20px] text-[#3d3d3d]">
-                {copy.label}
-                <span className="text-[#656767]">（{copy.description}）</span>
-              </p>
-            ) : (
-              <>
-                <span className="shrink-0 rounded px-1.5 py-0.5 text-[11px] font-bold leading-4 bg-[#fff4e5] text-[#b45309]">
-                  {copy.label}
-                </span>
-                <p className="min-w-0 text-[12px] font-medium leading-4 text-[#656767]">
-                  {copy.description}
-                </p>
-              </>
-            )}
-          </div>
-          <button type="button" onClick={onOpen} className={ACTION_BUTTON_CLASS} aria-haspopup="dialog">
-            {answered ? "変更" : "回答"}
-          </button>
-        </div>
-      </div>
+        <span className={`${STATUS_TEXT_CLASS} pointer-events-none`}>{statusText}</span>
+        <span className={ACTION_BUTTON_CLASS} aria-hidden>
+          {answered ? "回答を変更する" : "回答する"}
+        </span>
+      </button>
     </div>
   );
 }

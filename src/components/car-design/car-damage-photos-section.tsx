@@ -70,7 +70,7 @@ export function CarDamagePhotosSection({
           className="font-bold leading-[28px] text-[20px] text-[#3d3d3d]"
           data-node-id="4974:3045"
         >
-          傷サビ凹み
+          傷サビ凹み・汚れ破れ
         </p>
 
         <p
@@ -100,7 +100,7 @@ export function CarDamagePhotosSection({
               <PhotoUploadCard
                 slotId={CAR_DAMAGE_SLOT_ID}
                 dataNodeId="5059:592"
-                title="傷サビ凹み"
+                title="傷サビ凹み・汚れ破れ"
                 badge="required"
                 uploadTrigger="corner"
                 previewUrl={photoPreviews[CAR_DAMAGE_SLOT_ID]}
