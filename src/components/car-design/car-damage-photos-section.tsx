@@ -31,8 +31,8 @@ const CAR_FREE_PLUS_PLACEHOLDER = (
   </div>
 );
 
-const CAR_DAMAGE_FIELD_TITLE = "傷サビ凹み・汚れ破れ";
-const CAR_DAMAGE_UPLOAD_TITLE = "傷・汚れなど";
+const CAR_DAMAGE_FIELD_TITLE = "傷サビ凹み・破れ汚れ";
+const CAR_DAMAGE_UPLOAD_TITLE = "傷・破れなど";
 
 type CarDamagePhotosSectionProps = {
   damagePresence: CarDamagePresence | null;
