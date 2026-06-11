@@ -38,7 +38,7 @@ export function CarDamagePresenceStep({
       >
         <span className={`${STATUS_TEXT_CLASS} pointer-events-none`}>{statusText}</span>
         <span className={ACTION_BUTTON_CLASS} aria-hidden>
-          {answered ? "回答を変更する" : "回答する"}
+          {answered ? "変更する" : "回答する"}
         </span>
       </button>
     </div>
