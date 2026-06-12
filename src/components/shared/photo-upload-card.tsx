@@ -146,7 +146,7 @@ const CORNER_CAMERA_CLASSES =
   "absolute bottom-0 right-0 bg-white border border-[#389656] flex items-center justify-center p-2.5 rounded shrink-0";
 
 const PREVIEW_ACTION_BASE =
-  "absolute bottom-2 z-10 flex size-10 items-center justify-center rounded-[0.5rem] bg-white shadow-[0px_1px_2px_0px_rgba(61,61,61,0.16)] transition-colors";
+  "absolute bottom-2 z-10 flex size-[46px] p-2.5 items-center justify-center rounded-[0.5rem] bg-white shadow-[0px_1px_2px_0px_rgba(61,61,61,0.16)] transition-colors";
 
 /** Uploaded photo — fully visible, centered, aspect ratio preserved (no crop). */
 const UPLOADED_PHOTO_CLASSES =
@@ -205,7 +205,7 @@ function InitialCameraHint() {
       className={`${PREVIEW_ACTION_BASE} right-2 border border-[#389656] text-[#389656] pointer-events-none`}
       aria-hidden
     >
-      <IconCamera size={20} className="size-5" />
+      <IconCamera size={24} className="size-6" />
     </div>
   );
 }
