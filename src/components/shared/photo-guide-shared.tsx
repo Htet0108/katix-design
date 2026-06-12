@@ -15,7 +15,7 @@ export function PhotoSoftWarningBanner({
     <div
       className={`flex gap-2 items-start w-full rounded-lg bg-[#fff8e6] px-3 py-2.5 ${className ?? ""}`}
     >
-      <IconWarningCircle size={20} className="size-5 shrink-0 text-[#c99700] mt-0.5" />
+      <IconWarningCircle size={20} className="size-5 shrink-0 text-[#FE9B00] mt-0.5" />
       <p className="min-w-0 flex-1 text-left font-medium text-[13px] leading-[18px] text-[#505353]">
         {message}
       </p>

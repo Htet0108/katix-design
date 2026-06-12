@@ -67,7 +67,6 @@ export function DocumentsSection({
               title="車検証 (全体)"
               badge="required"
               subtitle="A4・A5サイズ"
-              buttonLabel="写真を追加"
               previewUrl={photoPreviews["doc-legacy"]}
               stackBody
               previewBoxClassName={DOC_PREVIEW_BOX}

@@ -105,17 +105,17 @@ function UploadPreviewPanel({
           type="button"
           aria-label="写真を削除"
           onClick={onRemove}
-          className="absolute bottom-2 left-2 z-10 flex size-9 items-center justify-center rounded-[0.5rem] bg-white/95 shadow-[0px_1px_2px_0px_rgba(61,61,61,0.16)] text-[#d01010] hover:bg-white transition-colors"
+          className="absolute bottom-2 left-2 z-10 flex size-10 items-center justify-center rounded-[0.5rem] border border-[#d01010] bg-white text-[#d01010] shadow-[0px_1px_2px_0px_rgba(61,61,61,0.16)] hover:bg-[#fff5f5] transition-colors"
         >
-          <IconTrash size={18} className="size-[18px]" />
+          <IconTrash size={20} className="size-5" />
         </button>
         <button
           type="button"
           aria-label="写真を変更"
           onClick={onReupload}
-          className="absolute bottom-2 right-2 z-10 flex size-9 items-center justify-center rounded-[0.5rem] bg-white/95 shadow-[0px_1px_2px_0px_rgba(61,61,61,0.16)] text-[#389656] hover:bg-white transition-colors"
+          className="absolute bottom-2 right-2 z-10 flex size-10 items-center justify-center rounded-[0.5rem] border border-[#389656] bg-white text-[#389656] shadow-[0px_1px_2px_0px_rgba(61,61,61,0.16)] hover:bg-[#f3faf5] transition-colors"
         >
-          <IconCamera size={18} className="size-[18px]" />
+          <IconCamera size={20} className="size-5" />
         </button>
       </div>
 

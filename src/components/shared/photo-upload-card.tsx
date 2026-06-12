@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { FieldFeedback } from "@/components/shared/form-controls";
-import { IconCamera, IconPlus } from "@/components/shared/icons";
+import { IconCamera, IconCheck, IconPlus } from "@/components/shared/icons";
 
 function RequiredBadge() {
   return (
@@ -25,7 +25,6 @@ export type PhotoUploadCardProps = {
   title: ReactNode;
   badge?: "required" | "optional";
   subtitle?: string;
-  buttonLabel?: string;
   previewUrl?: string;
   placeholder?: ReactNode;
   previewBoxClassName?: string;
@@ -43,7 +42,7 @@ export type PhotoUploadCardProps = {
   errorMessage?: string;
   /** true = warning icon, false = success icon. Omit while checking or when no photo. */
   hasSoftWarning?: boolean;
-  /** `bar` = full-width CTA (bike). `corner` = camera icon bottom-right on preview (car). */
+  /** `bar` = overlay actions on uploaded photo (bike). `corner` = camera icon bottom-right on preview (car). */
   uploadTrigger?: "bar" | "corner";
   onUploadClick: (slotId: string) => void;
 };
@@ -143,10 +142,11 @@ const DEFAULT_CARD = "flex flex-col w-full";
 const DEFAULT_HEADER = "min-h-9 shrink-0";
 const DEFAULT_BODY = "p-3";
 const CORNER_BODY = "p-3 gap-2 items-center";
-const CTA_CLASSES =
-  "border border-[#389656] flex gap-2 items-center justify-center px-4 py-2 min-h-10 w-full rounded-lg shrink-0";
 const CORNER_CAMERA_CLASSES =
-  "absolute bottom-0 right-0 bg-white border border-[#389656] flex items-center justify-center p-2 rounded shrink-0";
+  "absolute bottom-0 right-0 bg-white border border-[#389656] flex items-center justify-center p-2.5 rounded shrink-0";
+
+const PREVIEW_ACTION_BASE =
+  "absolute bottom-2 z-10 flex size-10 items-center justify-center rounded-[0.5rem] bg-white shadow-[0px_1px_2px_0px_rgba(61,61,61,0.16)] transition-colors";
 
 /** Uploaded photo — fully visible, centered, aspect ratio preserved (no crop). */
 const UPLOADED_PHOTO_CLASSES =
@@ -165,30 +165,16 @@ function UploadedPhotoPreview({ src }: { src: string }) {
 function CornerCameraButton() {
   return (
     <div className={CORNER_CAMERA_CLASSES} data-name="Button / Secondary" aria-hidden>
-      <IconCamera className="size-5 shrink-0 text-[#389656]" />
+      <IconCamera className="size-6 shrink-0 text-[#389656]" />
     </div>
   );
 }
 
-function UploadStatusCheckIcon({ className }: { className?: string }) {
+function UploadStatusExclamationIconFilled({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 12 10" fill="none" className={className} aria-hidden>
-      <path
-        d="M1 5.25L4.25 8.5L11 1.75"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function UploadStatusExclamationIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 4 14" fill="none" className={className} aria-hidden>
-      <path d="M2 1V9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="2" cy="12.5" r="1.25" fill="currentColor" />
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <rect x="10.5" y="5" width="3" height="10" rx="1.5" fill="currentColor" />
+      <circle cx="12" cy="18.5" r="1.75" fill="currentColor" />
     </svg>
   );
 }
@@ -196,19 +182,30 @@ function UploadStatusExclamationIcon({ className }: { className?: string }) {
 function PreviewStatusBadge({ status }: { status: "ok" | "warning" }) {
   const badgeClassName =
     status === "ok"
-      ? "border-[#389656] bg-[#ecf7ef] text-[#389656]"
-      : "border-[#f0a500] bg-[#fff8e6] text-[#f0a500]";
+      ? "bg-[#389656] text-white"
+      : "bg-[#FE9B00] text-white";
 
   return (
     <div
-      className={`absolute top-2 right-2 z-10 flex size-8 items-center justify-center rounded-full border-2 shadow-[0px_1px_2px_0px_rgba(61,61,61,0.12)] ${badgeClassName}`}
+      className={`absolute top-2 right-2 z-10 flex size-6 items-center justify-center rounded-full shadow-[0px_1px_2px_0px_rgba(61,61,61,0.12)] ${badgeClassName}`}
       aria-hidden
     >
       {status === "ok" ? (
-        <UploadStatusCheckIcon className="size-3" />
+        <IconCheck size={14} className="size-3.5" />
       ) : (
-        <UploadStatusExclamationIcon className="h-3.5 w-1" />
+        <UploadStatusExclamationIconFilled className="size-3.5" />
       )}
+    </div>
+  );
+}
+
+function InitialCameraHint() {
+  return (
+    <div
+      className={`${PREVIEW_ACTION_BASE} right-2 border border-[#389656] text-[#389656] pointer-events-none`}
+      aria-hidden
+    >
+      <IconCamera size={20} className="size-5" />
     </div>
   );
 }
@@ -218,7 +215,6 @@ export function PhotoUploadCard({
   title,
   badge,
   subtitle,
-  buttonLabel = "写真を追加",
   previewUrl,
   placeholder,
   previewBoxClassName,
@@ -244,12 +240,57 @@ export function PhotoUploadCard({
   const activePreviewBox =
     previewUrl && previewHug ? uploadPreviewBox : fixedPreviewBox;
   const useCornerTrigger = uploadTrigger === "corner";
+  const showBarCameraHint = uploadTrigger === "bar";
   const ariaTitle = typeof title === "string" ? title : slotId;
 
   const previewContent = previewUrl ? (
     <UploadedPhotoPreview src={previewUrl} />
   ) : (
     placeholder
+  );
+
+  const cardSurfaceClassName = `bg-white flex flex-col items-stretch overflow-hidden relative rounded border border-solid shadow-[0px_1px_2px_0px_rgba(61,61,61,0.08)] w-full text-left ${
+    errorMessage ? "border-[#d01010]" : "border-transparent"
+  } ${cardClassName}`;
+
+  const cardBody = (
+    <>
+      <div
+        className={`flex gap-1 items-center px-3 py-2 w-full pointer-events-none ${headerClassName}`}
+      >
+        <div className="flex flex-1 flex-col font-bold justify-center min-w-0 text-[14px] text-[#3d3d3d]">
+          {typeof title === "string" ? (
+            <span className="block leading-[20px]">{title}</span>
+          ) : (
+            title
+          )}
+        </div>
+        {badge === "required" && <RequiredBadge />}
+        {badge === "optional" && <OptionalBadge />}
+      </div>
+      <div
+        className={`flex flex-col w-full ${
+          useCornerTrigger
+            ? `${CORNER_BODY} pointer-events-none`
+            : `gap-3 items-stretch shrink-0 ${bodyClassName} pointer-events-none`
+        }`}
+        data-name="Container"
+      >
+        {subtitle && (
+          <span className="block leading-[20px] text-[14px] font-medium text-[#656767] w-full shrink-0">
+            {subtitle}
+          </span>
+        )}
+        <div data-photo-preview className={`w-full shrink-0 ${activePreviewBox}`}>
+          {previewContent}
+          {previewUrl && hasSoftWarning !== undefined && (
+            <PreviewStatusBadge status={hasSoftWarning ? "warning" : "ok"} />
+          )}
+          {showBarCameraHint && <InitialCameraHint />}
+          {useCornerTrigger && <CornerCameraButton />}
+        </div>
+      </div>
+    </>
   );
 
   return (
@@ -262,54 +303,11 @@ export function PhotoUploadCard({
         data-photo-slot={slotId}
         data-node-id={dataNodeId}
         onClick={() => onUploadClick(slotId)}
-        className={`bg-white flex flex-col items-stretch overflow-hidden relative rounded border border-solid shadow-[0px_1px_2px_0px_rgba(61,61,61,0.08)] w-full cursor-pointer text-left hover:opacity-70 transition-opacity touch-manipulation ${
-          errorMessage ? "border-[#d01010]" : "border-transparent"
-        } ${cardClassName}`}
-        aria-label={`${ariaTitle}の写真をアップロード`}
+        className={`${cardSurfaceClassName} cursor-pointer hover:opacity-70 transition-opacity touch-manipulation`}
+        aria-label={`${ariaTitle}の写真を${previewUrl ? "変更" : "アップロード"}`}
         aria-invalid={Boolean(errorMessage)}
       >
-        <div
-          className={`flex gap-1 items-center px-3 py-2 w-full pointer-events-none ${headerClassName}`}
-        >
-          <div className="flex flex-1 flex-col font-bold justify-center min-w-0 text-[14px] text-[#3d3d3d]">
-            {typeof title === "string" ? (
-              <span className="block leading-[20px]">{title}</span>
-            ) : (
-              title
-            )}
-          </div>
-          {badge === "required" && <RequiredBadge />}
-          {badge === "optional" && <OptionalBadge />}
-        </div>
-        <div
-          className={`flex flex-col w-full pointer-events-none ${
-            useCornerTrigger
-              ? CORNER_BODY
-              : `gap-3 items-stretch shrink-0 ${bodyClassName}`
-          }`}
-          data-name="Container"
-        >
-          {subtitle && (
-            <span className="block leading-[20px] text-[14px] font-medium text-[#656767] w-full shrink-0">
-              {subtitle}
-            </span>
-          )}
-          <div data-photo-preview className={`w-full shrink-0 ${activePreviewBox}`}>
-            {previewContent}
-            {previewUrl && hasSoftWarning !== undefined && (
-              <PreviewStatusBadge status={hasSoftWarning ? "warning" : "ok"} />
-            )}
-            {useCornerTrigger && <CornerCameraButton />}
-          </div>
-          {!useCornerTrigger && (
-            <div className={CTA_CLASSES} data-name="Button">
-              <span className="font-medium leading-6 text-base text-[#389656]">
-                {buttonLabel}
-              </span>
-              <IconCamera className="size-5 shrink-0 text-[#389656]" />
-            </div>
-          )}
-        </div>
+        {cardBody}
       </button>
       {errorMessage && <FieldFeedback message={errorMessage} />}
     </div>
