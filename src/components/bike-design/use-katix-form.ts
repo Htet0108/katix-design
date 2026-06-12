@@ -56,21 +56,18 @@ function toggleInSet<T extends string>(
 }
 
 export function useKatixForm() {
-  const [inspectionType, setInspectionType] =
-    useState<InspectionType>("electronic");
-  const [numberPlate, setNumberPlate] = useState<NumberPlateStatus>("with");
+  const [inspectionType, setInspectionType] = useState<InspectionType | null>(null);
+  const [numberPlate, setNumberPlate] = useState<NumberPlateStatus | null>(null);
   const [bikeConditions, setBikeConditions] = useState<Set<BikeConditionId>>(
-    () => new Set(["battery"])
+    () => new Set()
   );
-  const [accidents, setAccidents] = useState<Set<AccidentId>>(
-    () => new Set(["tip"])
-  );
-  const [meterHistory, setMeterHistory] = useState<MeterHistory>("yes");
-  const [owner, setOwner] = useState<OwnerType>("other");
-  const [loanStatus, setLoanStatus] = useState<LoanStatus>("paid");
+  const [accidents, setAccidents] = useState<Set<AccidentId>>(() => new Set());
+  const [meterHistory, setMeterHistory] = useState<MeterHistory | null>(null);
+  const [owner, setOwner] = useState<OwnerType | null>(null);
+  const [loanStatus, setLoanStatus] = useState<LoanStatus | null>(null);
   const [originalDocuments, setOriginalDocuments] = useState<
     Set<OriginalDocumentId>
-  >(() => new Set(["inspection", "disposal"]));
+  >(() => new Set());
 
   const [details, setDetails] = useState<Record<string, string>>({
     battery: "",

@@ -5,9 +5,17 @@ import { assets } from "@/lib/figma-assets";
 import { BikeCustomerForm } from "@/components/bike-design/bike-customer-form";
 import { DamagePhotosSection } from "@/components/bike-design/damage-photos-section";
 import { DocumentsSection } from "@/components/bike-design/documents-section";
-import { isRequiredUploadSlot, type RequiredUploadSlotId } from "@/components/bike-design/photo-slot-guides";
-import { shouldShowUploadGuide } from "@/components/shared/photo-upload-guide-prefs";
-import { PhotoUploadGuideModal } from "@/components/shared/photo-upload-guide-modal";
+import {
+  BIKE_UPLOAD_SLOT_ORDER,
+  getAdjacentRequiredUploadSlot,
+  isRequiredUploadSlot,
+} from "@/components/bike-design/photo-slot-guides";
+import { PhotoUploadGuideModal, type UploadGuidePhase } from "@/components/shared/photo-upload-guide-modal";
+import { useBodySlotSoftWarnings } from "@/components/bike-design/use-body-slot-soft-warnings";
+import {
+  createOkPreviewResult,
+  type PhotoUploadPreviewResult,
+} from "@/components/bike-design/validate-upload-photo";
 import {
   BIKE_ILLUSTRATION_PREVIEW_BOX,
   BikeIllustrationSlot,
@@ -42,6 +50,7 @@ function scrollToSection(element: HTMLElement | null) {
 type KatixBikeRegistrationViewProps = {
   form: KatixFormState;
   photoPreviews: Record<string, string>;
+  photoSoftWarnings: Partial<Record<"front" | "rear" | "left" | "right", boolean>>;
   freeSlotIds: string[];
   otherDocsSlotIds: string[];
   errors: KatixFormErrors;
@@ -53,6 +62,7 @@ type KatixBikeRegistrationViewProps = {
 function KatixBikeRegistrationView({
   form,
   photoPreviews,
+  photoSoftWarnings,
   freeSlotIds,
   otherDocsSlotIds,
   errors,
@@ -148,6 +158,7 @@ function KatixBikeRegistrationView({
                   </BikeIllustrationSlot>
                 }
                 errorMessage={photoError("front")}
+                hasSoftWarning={photoSoftWarnings.front}
                 onUploadClick={onPhotoUploadClick}
               />
               <PhotoUploadCard
@@ -164,6 +175,7 @@ function KatixBikeRegistrationView({
                   </BikeIllustrationSlot>
                 }
                 errorMessage={photoError("rear")}
+                hasSoftWarning={photoSoftWarnings.rear}
                 onUploadClick={onPhotoUploadClick}
               />
               <PhotoUploadCard
@@ -180,6 +192,7 @@ function KatixBikeRegistrationView({
                   </BikeIllustrationSlot>
                 }
                 errorMessage={photoError("left")}
+                hasSoftWarning={photoSoftWarnings.left}
                 onUploadClick={onPhotoUploadClick}
               />
               <PhotoUploadCard
@@ -196,6 +209,7 @@ function KatixBikeRegistrationView({
                   </BikeIllustrationSlot>
                 }
                 errorMessage={photoError("right")}
+                hasSoftWarning={photoSoftWarnings.right}
                 onUploadClick={onPhotoUploadClick}
               />
           </div>
@@ -401,9 +415,20 @@ export default function KatixBikeRegistrationPage() {
   const [freeSlotIds, setFreeSlotIds] = useState(["free-0"]);
   const [otherDocsSlotIds, setOtherDocsSlotIds] = useState(["other-docs-0"]);
   const [uploadGuideSlotId, setUploadGuideSlotId] = useState<string | null>(null);
+  const [uploadGuidePhase, setUploadGuidePhase] = useState<UploadGuidePhase>("guide");
+  const [uploadGuideSlide, setUploadGuideSlide] = useState<"prev" | "next" | null>(null);
+  const [previewResult, setPreviewResult] = useState<PhotoUploadPreviewResult | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<KatixFormErrors>({});
   const [showErrors, setShowErrors] = useState(false);
+  const photoSoftWarnings = useBodySlotSoftWarnings(photoPreviews);
+
+  useEffect(() => {
+    if (uploadGuideSlotId !== null) return;
+    setUploadGuidePhase("guide");
+    setUploadGuideSlide(null);
+    setPreviewResult(null);
+  }, [uploadGuideSlotId]);
 
   useEffect(() => {
     if (!showErrors) return;
@@ -423,6 +448,9 @@ export default function KatixBikeRegistrationPage() {
     form,
     photoPreviews,
     form.inspectionType,
+    form.numberPlate,
+    form.meterHistory,
+    form.loanStatus,
     form.bikeConditions,
     form.accidents,
     form.owner,
@@ -437,25 +465,95 @@ export default function KatixBikeRegistrationPage() {
 
   const handlePhotoUploadClick = useCallback(
     (slotId: string) => {
-      if (
-        isRequiredUploadSlot(slotId) &&
-        shouldShowUploadGuide(slotId as RequiredUploadSlotId)
-      ) {
+      if (isRequiredUploadSlot(slotId)) {
+        setUploadGuideSlide(null);
         setUploadGuideSlotId(slotId);
+        const preview = photoPreviews[slotId];
+        if (preview && isRequiredUploadSlot(slotId)) {
+          setUploadGuidePhase("preview");
+          setPreviewResult(createOkPreviewResult(preview, slotId));
+        } else {
+          setUploadGuidePhase("guide");
+          setPreviewResult(null);
+        }
         return;
       }
+      triggerPhotoUpload(slotId);
+    },
+    [triggerPhotoUpload, photoPreviews]
+  );
+
+  const handleUploadGuideConfirm = useCallback(
+    (slotId: string) => {
       triggerPhotoUpload(slotId);
     },
     [triggerPhotoUpload]
   );
 
-  const handleUploadGuideConfirm = useCallback(
-    (slotId: string) => {
-      setUploadGuideSlotId(null);
-      requestAnimationFrame(() => triggerPhotoUpload(slotId));
+  const handleUploadGuideClose = useCallback(() => {
+    setUploadGuideSlotId(null);
+  }, []);
+
+  const handleRemovePhoto = useCallback((slotId: string) => {
+    if (!isRequiredUploadSlot(slotId)) return;
+
+    setPhotoPreviews((prev) => {
+      const url = prev[slotId];
+      if (url?.startsWith("blob:")) {
+        URL.revokeObjectURL(url);
+      }
+      const next = { ...prev };
+      delete next[slotId];
+      return next;
+    });
+
+    if (previewResult?.url.startsWith("blob:")) {
+      URL.revokeObjectURL(previewResult.url);
+    }
+
+    setPreviewResult(null);
+    setUploadGuidePhase("guide");
+    setUploadGuideSlide(null);
+  }, [previewResult]);
+
+  const navigateGuideSlot = useCallback(
+    (targetSlot: (typeof BIKE_UPLOAD_SLOT_ORDER)[number], direction: "prev" | "next") => {
+      setUploadGuideSlide(direction);
+      setUploadGuideSlotId(targetSlot);
+      const preview = photoPreviews[targetSlot];
+      if (preview) {
+        setUploadGuidePhase("preview");
+        setPreviewResult(createOkPreviewResult(preview, targetSlot));
+      } else {
+        setUploadGuidePhase("guide");
+        setPreviewResult(null);
+      }
     },
-    [triggerPhotoUpload]
+    [photoPreviews]
   );
+
+  const handleGuideNavPrev = useCallback(() => {
+    const current = uploadGuideSlotId;
+    if (!current || !isRequiredUploadSlot(current)) return;
+
+    const prevSlot = getAdjacentRequiredUploadSlot(current, "prev");
+    if (!prevSlot) return;
+
+    navigateGuideSlot(prevSlot, "prev");
+  }, [uploadGuideSlotId, navigateGuideSlot]);
+
+  const handleGuideNavNext = useCallback(() => {
+    const current = uploadGuideSlotId;
+    if (!current || !isRequiredUploadSlot(current)) return;
+
+    const nextSlot = getAdjacentRequiredUploadSlot(current, "next");
+    if (!nextSlot) {
+      handleUploadGuideClose();
+      return;
+    }
+
+    navigateGuideSlot(nextSlot, "next");
+  }, [uploadGuideSlotId, navigateGuideSlot, handleUploadGuideClose]);
 
   const handlePhotoChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -463,14 +561,31 @@ export default function KatixBikeRegistrationPage() {
       const slot = activeSlotRef.current;
       if (!file || !slot) return;
 
-      const url = URL.createObjectURL(file);
-      setPhotoPreviews((prev) => ({ ...prev, [slot]: url }));
-      setErrors((prev) => {
-        if (!prev[slot]) return prev;
-        const next = { ...prev };
-        delete next[slot];
-        return next;
-      });
+      e.target.value = "";
+
+      if (isRequiredUploadSlot(slot) && uploadGuideSlotId !== null) {
+        const url = URL.createObjectURL(file);
+
+        setPreviewResult(createOkPreviewResult(url, slot));
+        setUploadGuidePhase("preview");
+        setUploadGuideSlide(null);
+        setPhotoPreviews((prev) => ({ ...prev, [slot]: url }));
+        setErrors((prev) => {
+          if (!prev[slot]) return prev;
+          const next = { ...prev };
+          delete next[slot];
+          return next;
+        });
+      } else {
+        const url = URL.createObjectURL(file);
+        setPhotoPreviews((prev) => ({ ...prev, [slot]: url }));
+        setErrors((prev) => {
+          if (!prev[slot]) return prev;
+          const next = { ...prev };
+          delete next[slot];
+          return next;
+        });
+      }
 
       if (slot.startsWith("free-")) {
         setFreeSlotIds((ids) => {
@@ -484,9 +599,8 @@ export default function KatixBikeRegistrationPage() {
         });
       }
 
-      e.target.value = "";
     },
-    []
+    [uploadGuideSlotId]
   );
 
   return (
@@ -495,7 +609,6 @@ export default function KatixBikeRegistrationPage() {
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="sr-only"
         onChange={handlePhotoChange}
         aria-hidden
@@ -503,8 +616,21 @@ export default function KatixBikeRegistrationPage() {
       <PhotoUploadGuideModal
         open={uploadGuideSlotId !== null}
         slotId={uploadGuideSlotId}
-        onClose={() => setUploadGuideSlotId(null)}
+        phase={uploadGuidePhase}
+        slideDirection={uploadGuideSlide}
+        previewResult={previewResult}
+        bodySlotWarnings={photoSoftWarnings}
+        prevDisabled={
+          !uploadGuideSlotId ||
+          !isRequiredUploadSlot(uploadGuideSlotId) ||
+          BIKE_UPLOAD_SLOT_ORDER[0] === uploadGuideSlotId
+        }
+        onClose={handleUploadGuideClose}
         onConfirm={handleUploadGuideConfirm}
+        onReupload={handleUploadGuideConfirm}
+        onRemovePhoto={handleRemovePhoto}
+        onNavPrev={handleGuideNavPrev}
+        onNavNext={handleGuideNavNext}
       />
       {submitted && (
         <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-[#389656] px-6 py-3 text-white shadow-lg">
@@ -515,6 +641,7 @@ export default function KatixBikeRegistrationPage() {
         <KatixBikeRegistrationView
           form={form}
           photoPreviews={photoPreviews}
+          photoSoftWarnings={photoSoftWarnings}
           freeSlotIds={freeSlotIds}
           otherDocsSlotIds={otherDocsSlotIds}
           errors={errors}

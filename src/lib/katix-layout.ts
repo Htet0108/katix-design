@@ -38,9 +38,9 @@ export const KATIX_CONTENT_WIDTH = "w-full min-w-0";
 export const KATIX_STACK =
   "flex flex-col gap-3 items-stretch w-full min-w-0";
 
-/** Photo upload grids — 2 columns at all breakpoints (430px mobile design). */
+/** Photo upload grids — 2 columns, top-aligned rows (errors must not stretch neighbors). */
 export const KATIX_PHOTO_GRID =
-  "grid grid-cols-2 gap-3 w-full min-w-0";
+  "grid grid-cols-2 gap-3 items-start w-full min-w-0";
 
 /** Fluid header — background spans viewport, content aligns to KATIX_INNER. */
 export const KATIX_HEADER_OUTER =

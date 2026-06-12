@@ -2,6 +2,26 @@
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { IconWarningCircle, IconX } from "@/components/shared/icons";
+
+export function PhotoSoftWarningBanner({
+  message,
+  className,
+}: {
+  message: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`flex gap-2 items-start w-full rounded-lg bg-[#fff8e6] px-3 py-2.5 ${className ?? ""}`}
+    >
+      <IconWarningCircle size={20} className="size-5 shrink-0 text-[#c99700] mt-0.5" />
+      <p className="min-w-0 flex-1 text-left font-medium text-[13px] leading-[18px] text-[#505353]">
+        {message}
+      </p>
+    </div>
+  );
+}
 
 export function PhotoGuideModalShell({
   open,
@@ -9,12 +29,14 @@ export function PhotoGuideModalShell({
   titleId,
   children,
   dataNodeId,
+  showCloseButton = false,
 }: {
   open: boolean;
   onClose: () => void;
   titleId: string;
   children: ReactNode;
   dataNodeId?: string;
+  showCloseButton?: boolean;
 }) {
   const [mounted, setMounted] = useState(false);
 
@@ -35,6 +57,9 @@ export function PhotoGuideModalShell({
 
   if (!open || !mounted) return null;
 
+  const modalPanelClassName =
+    "bg-white flex flex-col items-start overflow-clip relative rounded-lg shadow-[0px_1px_2px_0px_rgba(61,61,61,0.08)] w-full max-w-[358px] max-h-[calc(100vh-2rem)] touch-manipulation";
+
   return createPortal(
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 touch-manipulation"
@@ -44,10 +69,20 @@ export function PhotoGuideModalShell({
       onClick={onClose}
     >
       <div
-        className="bg-white flex flex-col items-start overflow-clip relative rounded-lg shadow-[0px_1px_2px_0px_rgba(61,61,61,0.08)] w-full max-w-[358px] max-h-[calc(100vh-2rem)] touch-manipulation"
+        className={modalPanelClassName}
         data-node-id={dataNodeId}
         onClick={(e) => e.stopPropagation()}
       >
+        {showCloseButton && (
+          <button
+            type="button"
+            aria-label="閉じる"
+            onClick={onClose}
+            className="absolute top-3 right-3 z-10 flex size-8 items-center justify-center rounded-full text-[#656767] hover:bg-[#f3f4f6] transition-colors"
+          >
+            <IconX size={20} className="size-5" />
+          </button>
+        )}
         {children}
       </div>
     </div>,

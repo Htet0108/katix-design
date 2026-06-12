@@ -16,8 +16,17 @@ export function validateKatixForm(
   photoPreviews: Record<string, string>
 ): KatixFormErrors {
   const errors: KatixFormErrors = {};
-  const { inspectionType, bikeConditions, accidents, owner, originalDocuments, details } =
-    form;
+  const {
+    inspectionType,
+    numberPlate,
+    meterHistory,
+    owner,
+    loanStatus,
+    bikeConditions,
+    accidents,
+    originalDocuments,
+    details,
+  } = form;
 
   for (const slot of REQUIRED_PHOTO_SLOTS) {
     if (!photoPreviews[slot]) {
@@ -25,7 +34,9 @@ export function validateKatixForm(
     }
   }
 
-  if (inspectionType === "electronic") {
+  if (!inspectionType) {
+    errors.inspectionType = ERROR_SELECT;
+  } else if (inspectionType === "electronic") {
     if (!photoPreviews["doc-electronic"]) {
       errors["doc-electronic"] = ERROR_PHOTO;
     }
@@ -34,6 +45,10 @@ export function validateKatixForm(
     }
   } else if (!photoPreviews["doc-legacy"]) {
     errors["doc-legacy"] = ERROR_PHOTO;
+  }
+
+  if (!numberPlate) {
+    errors.numberPlate = ERROR_SELECT;
   }
 
   if (bikeConditions.size === 0) {
@@ -60,8 +75,18 @@ export function validateKatixForm(
     errors.bikeDescription = ERROR_INPUT;
   }
 
-  if (owner === "other" && !details.ownerOther?.trim()) {
+  if (!meterHistory) {
+    errors.meterHistory = ERROR_SELECT;
+  }
+
+  if (!owner) {
+    errors.owner = ERROR_SELECT;
+  } else if (owner === "other" && !details.ownerOther?.trim()) {
     errors.ownerOther = ERROR_INPUT;
+  }
+
+  if (!loanStatus) {
+    errors.loanStatus = ERROR_SELECT;
   }
 
   if (originalDocuments.size === 0) {

@@ -2,7 +2,7 @@
 
 import { assets } from "@/lib/figma-assets";
 import { IconQuestion } from "@/components/shared/icons";
-import { RadioOption } from "@/components/shared/form-controls";
+import { FieldFeedback, RadioOption } from "@/components/shared/form-controls";
 import {
   DOC_PREVIEW_BOX,
   DOC_RECORD_PREVIEW_BOX,
@@ -14,7 +14,7 @@ import { KATIX_CONTENT_WIDTH, KATIX_PHOTO_GRID } from "@/lib/katix-layout";
 import type { InspectionType } from "@/components/bike-design/use-katix-form";
 
 type DocumentsSectionProps = {
-  inspectionType: InspectionType;
+  inspectionType: InspectionType | null;
   onInspectionTypeChange: (value: InspectionType) => void;
   onPhotoUploadClick: (slotId: string) => void;
   photoPreviews: Record<string, string>;
@@ -30,13 +30,14 @@ export function DocumentsSection({
   errors,
   showErrors,
 }: DocumentsSectionProps) {
-  const isLegacy = inspectionType === "legacy";
   const photoError = (slotId: string) => (showErrors ? errors[slotId] : undefined);
+  const inspectionTypeError = showErrors ? errors.inspectionType : undefined;
 
   return (
     <div
       className={`flex flex-col gap-2 items-stretch relative w-full min-w-0 ${KATIX_CONTENT_WIDTH}`}
-      data-node-id={isLegacy ? "1733:6569" : "1828:11142"}
+      data-node-id={inspectionType === "legacy" ? "1733:6569" : "1828:11142"}
+      data-error-field="inspectionType"
     >
       <p className="leading-[20px] text-[14px] font-medium text-[#3d3d3d] w-full">
         お持ちの車検証の書類を選択してください
@@ -56,7 +57,9 @@ export function DocumentsSection({
           description="2023年以前の発行で、氏名・住所が記載されたA4サイズの紙です"
         />
 
-        {isLegacy ? (
+        {inspectionTypeError && <FieldFeedback message={inspectionTypeError} />}
+
+        {inspectionType === "legacy" ? (
           <div className={KATIX_PHOTO_GRID}>
             <PhotoUploadCard
               slotId="doc-legacy"
@@ -73,7 +76,7 @@ export function DocumentsSection({
               onUploadClick={onPhotoUploadClick}
             />
           </div>
-        ) : (
+        ) : inspectionType === "electronic" ? (
           <>
             <div className="flex flex-wrap gap-1 items-center py-1">
               <IconQuestion className="size-5 shrink-0 text-[#2a7fff]" />
@@ -115,7 +118,7 @@ export function DocumentsSection({
               />
             </div>
           </>
-        )}
+        ) : null}
       </div>
     </div>
   );

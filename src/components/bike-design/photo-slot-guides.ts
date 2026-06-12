@@ -52,12 +52,47 @@ export function isRequiredUploadSlot(slotId: string): slotId is RequiredUploadSl
   return (REQUIRED_UPLOAD_SLOT_IDS as readonly string[]).includes(slotId);
 }
 
+export type BodyUploadSlotId = "front" | "rear" | "left" | "right";
+
+const BODY_UPLOAD_SLOT_IDS: readonly BodyUploadSlotId[] = ["front", "rear", "left", "right"];
+
+export function isBodyUploadSlot(slotId: RequiredUploadSlotId): slotId is BodyUploadSlotId {
+  return (BODY_UPLOAD_SLOT_IDS as readonly string[]).includes(slotId);
+}
+
+/** Non-blocking preview warning copy under body-slot photos. */
+export const BODY_SLOT_SOFT_WARNING_MESSAGE =
+  "バイクの向きが異なるため、撮り直しをお願いする場合があります。";
+
 export function getSlotProgressLabel(slotId: RequiredUploadSlotId): string | null {
   const bikeIndex = (BIKE_UPLOAD_SLOT_ORDER as readonly string[]).indexOf(slotId);
   if (bikeIndex >= 0) {
     return `${bikeIndex + 1} / ${BIKE_UPLOAD_SLOT_TOTAL} 枚目`;
   }
   return null;
+}
+
+export function getNextRequiredUploadSlot(
+  currentSlotId: RequiredUploadSlotId,
+  photoPreviews: Record<string, string>
+): RequiredUploadSlotId | null {
+  const currentIndex = BIKE_UPLOAD_SLOT_ORDER.indexOf(currentSlotId);
+  for (let i = currentIndex + 1; i < BIKE_UPLOAD_SLOT_ORDER.length; i++) {
+    const slotId = BIKE_UPLOAD_SLOT_ORDER[i];
+    if (!photoPreviews[slotId]) return slotId;
+  }
+  return null;
+}
+
+export function getAdjacentRequiredUploadSlot(
+  currentSlotId: RequiredUploadSlotId,
+  direction: "prev" | "next"
+): RequiredUploadSlotId | null {
+  const currentIndex = BIKE_UPLOAD_SLOT_ORDER.indexOf(currentSlotId);
+  if (currentIndex < 0) return null;
+  const nextIndex = direction === "next" ? currentIndex + 1 : currentIndex - 1;
+  if (nextIndex < 0 || nextIndex >= BIKE_UPLOAD_SLOT_ORDER.length) return null;
+  return BIKE_UPLOAD_SLOT_ORDER[nextIndex];
 }
 
 const BIKE_SAMPLE_BOX = "relative h-[120px] w-full overflow-hidden bg-[#f3f4f6]";

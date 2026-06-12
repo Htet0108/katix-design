@@ -41,6 +41,8 @@ export type PhotoUploadCardProps = {
   illustrationPreviewBox?: string;
   stackBody?: boolean;
   errorMessage?: string;
+  /** true = warning icon, false = success icon. Omit while checking or when no photo. */
+  hasSoftWarning?: boolean;
   /** `bar` = full-width CTA (bike). `corner` = camera icon bottom-right on preview (car). */
   uploadTrigger?: "bar" | "corner";
   onUploadClick: (slotId: string) => void;
@@ -137,7 +139,7 @@ export function DocRecordIllustrationPlaceholder({
   );
 }
 
-const DEFAULT_CARD = "flex flex-col h-full min-h-0";
+const DEFAULT_CARD = "flex flex-col w-full";
 const DEFAULT_HEADER = "min-h-9 shrink-0";
 const DEFAULT_BODY = "p-3";
 const CORNER_BODY = "p-3 gap-2 items-center";
@@ -146,10 +148,67 @@ const CTA_CLASSES =
 const CORNER_CAMERA_CLASSES =
   "absolute bottom-0 right-0 bg-white border border-[#389656] flex items-center justify-center p-2 rounded shrink-0";
 
+/** Uploaded photo — fully visible, centered, aspect ratio preserved (no crop). */
+const UPLOADED_PHOTO_CLASSES =
+  "absolute inset-0 size-full object-contain object-center rounded pointer-events-none";
+
+function UploadedPhotoPreview({ src }: { src: string }) {
+  return (
+    <img
+      src={src}
+      alt="アップロード済み"
+      className={UPLOADED_PHOTO_CLASSES}
+    />
+  );
+}
+
 function CornerCameraButton() {
   return (
     <div className={CORNER_CAMERA_CLASSES} data-name="Button / Secondary" aria-hidden>
       <IconCamera className="size-5 shrink-0 text-[#389656]" />
+    </div>
+  );
+}
+
+function UploadStatusCheckIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 12 10" fill="none" className={className} aria-hidden>
+      <path
+        d="M1 5.25L4.25 8.5L11 1.75"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function UploadStatusExclamationIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 4 14" fill="none" className={className} aria-hidden>
+      <path d="M2 1V9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="2" cy="12.5" r="1.25" fill="currentColor" />
+    </svg>
+  );
+}
+
+function PreviewStatusBadge({ status }: { status: "ok" | "warning" }) {
+  const badgeClassName =
+    status === "ok"
+      ? "border-[#389656] bg-[#ecf7ef] text-[#389656]"
+      : "border-[#f0a500] bg-[#fff8e6] text-[#f0a500]";
+
+  return (
+    <div
+      className={`absolute top-2 right-2 z-10 flex size-8 items-center justify-center rounded-full border-2 shadow-[0px_1px_2px_0px_rgba(61,61,61,0.12)] ${badgeClassName}`}
+      aria-hidden
+    >
+      {status === "ok" ? (
+        <UploadStatusCheckIcon className="size-3" />
+      ) : (
+        <UploadStatusExclamationIcon className="h-3.5 w-1" />
+      )}
     </div>
   );
 }
@@ -173,6 +232,7 @@ export function PhotoUploadCard({
   illustrationPreviewBox,
   stackBody = false,
   errorMessage,
+  hasSoftWarning,
   uploadTrigger = "bar",
   onUploadClick,
 }: PhotoUploadCardProps) {
@@ -181,32 +241,20 @@ export function PhotoUploadCard({
     uploadedPreviewClassName ??
     previewContainerClassName;
   const fixedPreviewBox = illustrationPreviewBox ?? uploadPreviewBox;
-  const useUploadPreviewBox = previewUrl && previewHug;
-  const activePreviewBox = useUploadPreviewBox ? uploadPreviewBox : fixedPreviewBox;
+  const activePreviewBox =
+    previewUrl && previewHug ? uploadPreviewBox : fixedPreviewBox;
   const useCornerTrigger = uploadTrigger === "corner";
   const ariaTitle = typeof title === "string" ? title : slotId;
 
   const previewContent = previewUrl ? (
-    previewHug ? (
-      <img
-        src={previewUrl}
-        alt="アップロード済み"
-        className="block w-full h-auto object-cover rounded"
-      />
-    ) : (
-      <img
-        src={previewUrl}
-        alt="アップロード済み"
-        className="absolute inset-0 size-full object-cover rounded"
-      />
-    )
+    <UploadedPhotoPreview src={previewUrl} />
   ) : (
     placeholder
   );
 
   return (
     <div
-      className="flex flex-col gap-1 w-full min-w-0 justify-self-stretch"
+      className="flex flex-col gap-1 w-full min-w-0 self-start"
       data-error-field={errorMessage ? slotId : undefined}
     >
       <button
@@ -237,7 +285,7 @@ export function PhotoUploadCard({
           className={`flex flex-col w-full pointer-events-none ${
             useCornerTrigger
               ? CORNER_BODY
-              : `gap-3 items-stretch ${stackBody ? "shrink-0" : "flex-1 min-h-0"} ${bodyClassName}`
+              : `gap-3 items-stretch shrink-0 ${bodyClassName}`
           }`}
           data-name="Container"
         >
@@ -248,13 +296,13 @@ export function PhotoUploadCard({
           )}
           <div data-photo-preview className={`w-full shrink-0 ${activePreviewBox}`}>
             {previewContent}
+            {previewUrl && hasSoftWarning !== undefined && (
+              <PreviewStatusBadge status={hasSoftWarning ? "warning" : "ok"} />
+            )}
             {useCornerTrigger && <CornerCameraButton />}
           </div>
           {!useCornerTrigger && (
-            <div
-              className={`${CTA_CLASSES} ${stackBody ? "" : "mt-auto"}`}
-              data-name="Button"
-            >
+            <div className={CTA_CLASSES} data-name="Button">
               <span className="font-medium leading-6 text-base text-[#389656]">
                 {buttonLabel}
               </span>
