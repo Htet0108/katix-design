@@ -8,9 +8,11 @@ type CarDamagePresenceStepProps = {
   hasError?: boolean;
 };
 
+const ANSWER_PREFIX = "（傷・破れなど）";
+
 const ANSWER_LABEL: Record<CarDamagePresence, string> = {
-  yes: "（傷サビ凹み・破れ汚れ）あり",
-  no: "（傷サビ凹み・破れ汚れ）なし",
+  yes: `${ANSWER_PREFIX}あり`,
+  no: `${ANSWER_PREFIX}なし`,
 };
 
 const STATUS_TEXT_CLASS = "min-w-0 text-[14px] font-medium leading-[20px] text-[#3d3d3d]";
@@ -33,7 +35,7 @@ export function CarDamagePresenceStep({
 }: CarDamagePresenceStepProps) {
   const answered = presence !== null;
   const borderClass = hasError && !answered ? "border-[#d01010]" : "border-transparent";
-  const statusText = answered && presence ? ANSWER_LABEL[presence] : "（傷サビ凹み・破れ汚れ）未回答";
+  const statusText = answered && presence ? ANSWER_LABEL[presence] : `${ANSWER_PREFIX}未回答`;
 
   return (
     <div className="flex flex-col gap-1 w-full min-w-0">
@@ -42,7 +44,7 @@ export function CarDamagePresenceStep({
         onClick={onOpen}
         className={`bg-white flex items-center justify-between gap-3 overflow-hidden relative rounded border border-solid shadow-[0px_1px_2px_0px_rgba(61,61,61,0.08)] w-full cursor-pointer px-3 py-3 text-left hover:opacity-70 transition-opacity touch-manipulation ${borderClass}`}
         aria-haspopup="dialog"
-        aria-label={answered ? `${statusText}の回答を変更` : "傷サビ凹み・破れ汚れについて回答"}
+        aria-label={answered ? `${statusText}の回答を変更` : "傷・破れなどについて回答"}
       >
         <span className={`${STATUS_TEXT_CLASS} flex-1 pointer-events-none`}>{statusText}</span>
         <RequiredBadge />
